@@ -5,6 +5,7 @@ module Data.Array.Repa.Eval.Reduction
 where
 import Data.Array.Repa.Eval.Elt
 import Data.Array.Repa.Eval.Gang
+import Data.Array.Repa.Eval.GangMPar
 import qualified Data.Vector.Unboxed            as V
 import qualified Data.Vector.Unboxed.Mutable    as M
 import GHC.Base                                 ( quotInt, divInt )
@@ -107,11 +108,14 @@ foldAllP f c !r !len
   | len == 0    = return r
   | otherwise   = do
       mvec <- M.unsafeNew chunks
-      gangIO theGang $ \tid -> fill mvec tid (split tid) (split (tid+1))
+--      gangIO theGang
+      gangIOMPar chunks
+       $ \tid -> fill mvec tid (split tid) (split (tid+1))
       vec  <- V.unsafeFreeze mvec
       return $! V.foldl' c r vec
   where
-    !threads    = gangSize theGang
+    !threads    = 100 --gangSize theGang
+--    !(I# nChunks) = 100 -- Assume 10 threads with 10 work items
     !step       = (len + threads - 1) `quotInt` threads
     chunks      = ((len + step - 1) `divInt` step) `min` threads
 
