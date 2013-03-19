@@ -9,6 +9,8 @@ module Data.Array.Repa.Eval.Chunked
 where
 import Data.Array.Repa.Index
 import Data.Array.Repa.Eval.Gang
+import Data.Array.Repa.Eval.GangMPar
+import Control.Monad.Par
 
 import GHC.Exts
 import Prelude		as P
@@ -85,30 +87,39 @@ fillBlock2S
 --     and each thread linearly fills one chunk.
 -- 
 fillChunkedP
-        :: Int                  -- ^ Number of elements.
+        :: (Show a, NFData a)
+        => Int                  -- ^ Number of elements.
 	-> (Int -> a -> IO ())	-- ^ Update function to write into result buffer.
 	-> (Int -> a)	        -- ^ Fn to get the value at a given index.
 	-> IO ()
 
 fillChunkedP !(I# len) write getElem
- = 	gangIO theGang
-	 $  \(I# thread) -> 
-              let !start   = splitIx thread
-                  !end     = splitIx (thread +# 1#)
+-- = 	gangIO theGang
+ =      gangIOMPar (I# nChunks)
+	 $  \(I# i) -> 
+              let !start   = splitIx i
+                  !end     = splitIx (i +# 1#)
               in  fill start end
 
  where
 	-- Decide now to split the work across the threads.
 	-- If the length of the vector doesn't divide evenly among the threads,
 	-- then the first few get an extra element.
-	!(I# threads) 	= gangSize theGang
-	!chunkLen 	= len `quotInt#` threads
-	!chunkLeftover	= len `remInt#`  threads
+--	!(I# threads) 	= gangSize theGang
+--	!chunkLen 	= len `quotInt#` threads
+--	!chunkLeftover	= len `remInt#`  threads
+        !(I# chunkLen) = 500000
+        --TODO: ^^ This number needs to be automatic.
+        --      We also probably want a number that is relative to the number of chunks
+        --      (and thereby the number of threads, not just chunk length).
+        --      We might want user input as well, specifying minimum chunk length.
+        !nChunks       = len `quotInt#` chunkLen
+        !chunkLeftover = len `remInt#` nChunks
 
 	{-# INLINE splitIx #-}
-	splitIx thread
-	 | thread <# chunkLeftover = thread *# (chunkLen +# 1#)
-	 | otherwise	 	   = thread *# chunkLen  +# chunkLeftover
+	splitIx i
+	 | i <# chunkLeftover      = i *# (chunkLen +# 1#)
+	 | otherwise	 	   = i *# chunkLen  +# chunkLeftover
 
 	-- Evaluate the elements of a single chunk.
 	{-# INLINE fill #-}
@@ -116,6 +127,7 @@ fillChunkedP !(I# len) write getElem
 	 | ix >=# end		= return ()
 	 | otherwise
 	 = do	write (I# ix) (getElem (I# ix))
+--                putStrLn ("arr[" ++ (show (I# ix)) ++ "] = " ++ (show (getElem (I# ix))))
 		fill (ix +# 1#) end
 {-# INLINE [0] fillChunkedP #-}
 

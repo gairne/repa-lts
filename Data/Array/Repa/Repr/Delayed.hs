@@ -14,6 +14,7 @@ import Data.Array.Repa.Shape
 import Data.Array.Repa.Base
 import Debug.Trace
 import GHC.Exts
+import Control.Monad.Par
 
 -- | Delayed arrays are represented as functions from the index to element value.
 --
@@ -45,7 +46,7 @@ instance Source D a where
 
 -- Load -----------------------------------------------------------------------
 -- | Compute all elements in an array.
-instance Shape sh => Load D sh e where
+instance (Show e, NFData e, Shape sh) => Load D sh e where
  loadP (ADelayed sh getElem) mvec
   = mvec `deepSeqMVec` 
     do  traceEventIO "Repa.loadP[Delayed]: start"
@@ -64,7 +65,7 @@ instance Shape sh => Load D sh e where
 
 
 -- | Compute a range of elements in a rank-2 array.
-instance Elt e => LoadRange D DIM2 e where
+instance (Show e, NFData e, Elt e) => LoadRange D DIM2 e where
  loadRangeP  (ADelayed (Z :. _h :. (I# w)) getElem) mvec
              (Z :. (I# y0) :. (I# x0)) (Z :. (I# h0) :. (I# w0))
   = mvec `deepSeqMVec` 

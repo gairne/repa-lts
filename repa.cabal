@@ -1,4 +1,4 @@
-Name:                repa
+Name:                repa-experimental
 Version:             3.2.3.1
 License:             BSD3
 License-file:        LICENSE
@@ -26,7 +26,10 @@ Library
         vector               >= 0.9 && <= 0.10,
         bytestring           == 0.10.*,
         template-haskell     >= 2.8.0.0 && <= 2.9.0.0,
-        QuickCheck           >= 2.3 && < 2.6
+        QuickCheck           >= 2.3 && < 2.6,
+        monad-par            == 0.3.4.1,
+        transformers         == 0.3.*,
+        abstract-par         == 0.3.1
 
   ghc-options:
         -Wall -fno-warn-missing-signatures
@@ -49,6 +52,7 @@ Library
 
   Exposed-modules:
         Data.Array.Repa.Eval.Gang
+        Data.Array.Repa.Eval.GangMPar
         Data.Array.Repa.Operators.IndexSpace
         Data.Array.Repa.Operators.Interleave
         Data.Array.Repa.Operators.Mapping
