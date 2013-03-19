@@ -21,11 +21,11 @@ Synopsis:
 
 Library
   Build-Depends: 
-        base                 == 4.6.*,
+        base                 >= 4.6.0.0 && <= 4.7.0.0,
         ghc-prim             == 0.3.*,
-        vector               == 0.10.*,
+        vector               >= 0.9 && <= 0.10,
         bytestring           == 0.10.*,
-        template-haskell     == 2.8.*,
+        template-haskell     >= 2.8.0.0 && <= 2.9.0.0,
         QuickCheck           >= 2.3 && < 2.6
 
   ghc-options:

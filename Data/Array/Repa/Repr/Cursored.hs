@@ -1,4 +1,5 @@
 {-# LANGUAGE MagicHash #-}
+{-# LANGUAGE ExistentialQuantification #-}
 module Data.Array.Repa.Repr.Cursored
         ( C, Array (..)
         , makeCursored)
