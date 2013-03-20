@@ -47,10 +47,11 @@ foldP :: (Elt a, V.Unbox a)
       -> IO ()
 {-# INLINE [1] foldP #-}
 foldP vec f c !r (I# n)
-  = gangIO theGang
+--  = gangIO theGang
+  = gangIOMPar (I# threads)
   $ \(I# tid) -> fill (split tid) (split (tid +# 1#))
   where
-    !(I# threads) = gangSize theGang
+    !(I# threads) = 100 --gangSize theGang
     !(I# len)     = M.length vec
     !step         = (len +# threads -# 1#) `quotInt#` threads
 

@@ -10,7 +10,7 @@ import GHC.Base					(remInt, quotInt)
 import Prelude					as P
 import Control.Monad				as P
 import Data.IORef
-
+import Data.Array.Repa.Eval.GangMPar
 
 -- | Select indices matching a predicate.
 --  
@@ -70,7 +70,8 @@ selectChunkedP fnMatch fnProduce !len
 			newIORef vec
 
 	-- Fire off a thread to fill each chunk.
-	gangIO theGang
+--	gangIO theGang
+        gangIOMPar threads
 	 $ \thread -> makeChunk (refs !! thread)
 			(splitIx thread)
 			(splitIx (thread + 1) - 1)
@@ -81,7 +82,7 @@ selectChunkedP fnMatch fnProduce !len
 	P.mapM readIORef refs
 
  where	-- See how many threads we have available.
-	!threads 	= gangSize theGang
+	!threads 	= 100 --gangSize theGang
 	!chunkLen 	= len `quotInt` threads
 	!chunkLeftover	= len `remInt`  threads
 
