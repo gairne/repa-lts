@@ -12,6 +12,8 @@ import Control.Monad				as P
 import Data.IORef
 import Data.Array.Repa.Eval.GangMPar
 
+import GHC.Conc
+
 -- | Select indices matching a predicate.
 --  
 --   * This primitive can be useful for writing filtering functions.
@@ -82,7 +84,7 @@ selectChunkedP fnMatch fnProduce !len
 	P.mapM readIORef refs
 
  where	-- See how many threads we have available.
-	!threads 	= 100 --gangSize theGang
+	!threads 	= numCapabilities --gangSize theGang
 	!chunkLen 	= len `quotInt` threads
 	!chunkLeftover	= len `remInt`  threads
 

@@ -14,6 +14,7 @@ import Control.Monad.Par
 
 import GHC.Exts
 import Prelude		as P
+import GHC.Conc
 
 -------------------------------------------------------------------------------
 -- | Fill something sequentially.
@@ -95,7 +96,7 @@ fillChunkedP
 
 fillChunkedP !(I# len) write getElem
 -- = 	gangIO theGang
- =      gangIOMPar (I# nChunks)
+ =      gangIOMPar (I# threads)
 	 $  \(I# i) -> 
               let !start   = splitIx i
                   !end     = splitIx (i +# 1#)
@@ -105,16 +106,13 @@ fillChunkedP !(I# len) write getElem
 	-- Decide now to split the work across the threads.
 	-- If the length of the vector doesn't divide evenly among the threads,
 	-- then the first few get an extra element.
---	!(I# threads) 	= gangSize theGang
---	!chunkLen 	= len `quotInt#` threads
---	!chunkLeftover	= len `remInt#`  threads
-        !(I# chunkLen) = 500000
+	!(I# threads) 	= numCapabilities --gangSize theGang
+	!chunkLen 	= len `quotInt#` threads
+	!chunkLeftover	= len `remInt#`  threads
         --TODO: ^^ This number needs to be automatic.
         --      We also probably want a number that is relative to the number of chunks
         --      (and thereby the number of threads, not just chunk length).
         --      We might want user input as well, specifying minimum chunk length.
-        !nChunks       = len `quotInt#` chunkLen
-        !chunkLeftover = len `remInt#` nChunks
 
 	{-# INLINE splitIx #-}
 	splitIx i

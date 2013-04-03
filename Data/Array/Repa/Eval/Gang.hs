@@ -174,7 +174,7 @@ gangIO	:: Gang
 
 {-# NOINLINE gangIO #-}
 gangIO gang@(Gang _ _ _ busy) action
- = do	error "Gang:gangIO called"
+ = do	putStrLn "Gang:gangIO called"
         b <- swapMVar busy True
         if b
          then do
