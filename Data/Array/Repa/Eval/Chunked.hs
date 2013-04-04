@@ -16,6 +16,8 @@ import GHC.Exts
 import Prelude		as P
 import GHC.Conc
 
+cHUNKS_PER_THREAD = 1
+
 -------------------------------------------------------------------------------
 -- | Fill something sequentially.
 -- 
@@ -106,7 +108,7 @@ fillChunkedP !(I# len) write getElem
 	-- Decide now to split the work across the threads.
 	-- If the length of the vector doesn't divide evenly among the threads,
 	-- then the first few get an extra element.
-	!(I# threads) 	= numCapabilities --gangSize theGang
+	!(I# threads) 	= cHUNKS_PER_THREAD * numCapabilities --gangSize theGang
 	!chunkLen 	= len `quotInt#` threads
 	!chunkLeftover	= len `remInt#`  threads
         --TODO: ^^ This number needs to be automatic.

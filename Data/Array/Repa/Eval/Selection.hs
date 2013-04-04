@@ -14,6 +14,8 @@ import Data.Array.Repa.Eval.GangMPar
 
 import GHC.Conc
 
+cHUNKS_PER_THREAD = 1
+
 -- | Select indices matching a predicate.
 --  
 --   * This primitive can be useful for writing filtering functions.
@@ -84,7 +86,7 @@ selectChunkedP fnMatch fnProduce !len
 	P.mapM readIORef refs
 
  where	-- See how many threads we have available.
-	!threads 	= numCapabilities --gangSize theGang
+	!threads 	= cHUNKS_PER_THREAD * numCapabilities --gangSize theGang
 	!chunkLen 	= len `quotInt` threads
 	!chunkLeftover	= len `remInt`  threads
 
