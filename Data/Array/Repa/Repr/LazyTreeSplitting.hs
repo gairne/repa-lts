@@ -1,7 +1,7 @@
 
 module Data.Array.Repa.Repr.LazyTreeSplitting
         ( L, Array (..)
-        , fromListToTree)
+        )
 where
 import Data.Array.Repa.Shape            as R
 import Data.Array.Repa.Base             as R
@@ -58,105 +58,3 @@ deriving instance (Show sh, Show e)
 
 deriving instance (Read sh, Read e)
         => Read (Array L sh e)
-
-
--- Fill -----------------------------------------------------------------------
--- | Filling of unboxed vector arrays.
-instance U.Unbox e => Target U e where
- data MVec U e 
-  = ()
-
- newMVec n
-  = error "newMVec: Should not be used"
- {-# INLINE newMVec #-}
-
- unsafeWriteMVec v ix
-  = error "unsafeWriteMVec: Should not be used"
- {-# INLINE unsafeWriteMVec #-}
-
- unsafeFreezeMVec sh v     
-  = error "unsafeFreezeMVec: Should not be used"
- {-# INLINE unsafeFreezeMVec #-}
-
- deepSeqMVec v x
-  = error "deepSeqMVec: Should not be used"
- {-# INLINE deepSeqMVec #-}
-
- touchMVec _ 
-  = return ()
- {-# INLINE touchMVec #-}
-
-loadPLTS :: Shape sh => Array L sh e -> 
-
--- Load -----------------------------------------------------------------------
--- | Compute all elements in an array.
-instance Shape sh => Load D sh e where
- loadP (ADelayed sh getElem) mvec
-  = mvec `deepSeqMVec`
-    do  traceEventIO "Repa.loadP[LTS]: start"
---        fillChunkedP (size sh) (unsafeWriteMVec mvec) (getElem . fromIndex sh)
---        touchMVec mvec
-        traceEventIO "Repa.loadP[LTS]: end"
- {-# INLINE [4] loadP #-}
-
- loadS (ADelayed sh getElem) mvec
-  = mvec `deepSeqMVec`
-    do  traceEventIO "Repa.loadS[LTS]: start"
---        fillLinearS (size sh) (unsafeWriteMVec mvec) (getElem . fromIndex sh)
---        touchMVec mvec
-        traceEventIO "Repa.loadS[LTS]: end"
- {-# INLINE [4] loadS #-}
-
-
--- Conversions ----------------------------------------------------------------
--- | Sequential computation of array elements..
---
---   * This is an alias for `computeS` with a more specific type.
---
-computeUnboxedS
-        :: ( Shape sh
-           , Load r1 sh e, U.Unbox e)
-        => Array r1 sh e -> Array U sh e
-computeUnboxedS = computeS
-{-# INLINE computeUnboxedS #-}
-
-
--- | Parallel computation of array elements.
---
---   * This is an alias for `computeP` with a more specific type.
---
-computeUnboxedP
-        :: ( Shape sh
-           , Load r1 sh e, Monad m, U.Unbox e)
-        => Array r1 sh e -> m (Array U sh e)
-computeUnboxedP = computeP
-{-# INLINE computeUnboxedP #-}
-
-
--- | O(n). Convert a list to an unboxed vector array.
--- 
---   * This is an alias for `fromList` with a more specific type.
---
-fromListUnboxed
-        :: (Shape sh, U.Unbox a)
-        => sh -> [a] -> Array U sh a
-fromListUnboxed = R.fromList
-{-# INLINE fromListUnboxed #-}
-
-
--- | O(1). Wrap an unboxed vector as an array.
-fromUnboxed
-        :: (Shape sh, U.Unbox e)
-        => sh -> U.Vector e -> Array U sh e
-fromUnboxed sh vec
-        = AUnboxed sh vec
-{-# INLINE fromUnboxed #-}
-
-
--- | O(1). Unpack an unboxed vector from an array.
-toUnboxed
-        :: U.Unbox e
-        => Array U sh e -> U.Vector e
-toUnboxed (AUnboxed _ vec)
-        = vec
-{-# INLINE toUnboxed #-}

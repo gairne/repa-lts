@@ -23,6 +23,10 @@ import Data.Array.Repa.Repr.Undefined
 import Prelude hiding (map, zipWith)
 import Foreign.Storable
 import Data.Word
+import qualified Data.Rope as RP
+
+mapLTS :: (Shape sh, Source L a) => (a -> b) -> Array L sh a -> Array L sh a
+mapLTS f rope = RP.mapLTS f rope
 
 -- | Apply a worker function to each element of an array, 
 --   yielding a new array with the same extent.
