@@ -1,13 +1,17 @@
 {-# LANGUAGE BangPatterns #-}
 module Data.Array.Repa.Operators.Selection
-	(selectP)
+	(selectP, filterLTS)
 where
 import Data.Array.Repa.Index
+import Data.Array.Repa.Shape
 import Data.Array.Repa.Base
 import Data.Array.Repa.Eval.Selection
 import Data.Array.Repa.Repr.Unboxed             as U
 import qualified Data.Vector.Unboxed		as V
 import System.IO.Unsafe
+import Control.Monad.Par
+import Data.Array.Repa.Repr.LazyTreeSplitting
+import qualified Data.Rope as RP
 
 
 -- | Produce an array by applying a predicate to a range of integers.
@@ -42,3 +46,7 @@ selectP match produce len
 
 		return	(Z :. V.length result, result)
 {-# INLINE [1] selectP #-}
+
+filterLTS :: (Shape sh, Source L a) => (a -> Bool) -> Array L sh a -> Array L sh a
+filterLTS f rope = fromRope (extent rope) $ runPar $ RP.filterLTS f (toRope rope)
+-- Will extent rope be applicable...? the rope has changed length

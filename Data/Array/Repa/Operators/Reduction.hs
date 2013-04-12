@@ -1,7 +1,7 @@
 {-# LANGUAGE BangPatterns, ExplicitForAll, TypeOperators, MagicHash #-}
 {-# OPTIONS -fno-warn-orphans #-}
 module Data.Array.Repa.Operators.Reduction
-	( foldS,        foldP
+	( foldS,        foldP, reduceLTS
 	, foldAllS,     foldAllP
 	, sumS,         sumP
 	, sumAllS,      sumAllP
@@ -17,8 +17,12 @@ import qualified Data.Vector.Unboxed	        as V
 import qualified Data.Vector.Unboxed.Mutable    as M
 import Prelude				        hiding (sum)
 import qualified Data.Array.Repa.Eval.Reduction as E
+import Data.Array.Repa.Repr.LazyTreeSplitting
+import qualified Data.Rope as RP
+import Control.Monad.Par
 import System.IO.Unsafe
 import GHC.Exts
+import Control.DeepSeq
 
 -- fold ----------------------------------------------------------------------
 -- | Sequential reduction of the innermost dimension of an arbitrary rank array.
@@ -181,3 +185,5 @@ equalsS arr1 arr2
         =   extent arr1 == extent arr2
         && (foldAllS (&&) True (R.zipWith (==) arr1 arr2))
 
+reduceLTS :: (Shape sh, Source L a, NFData a) => (a -> a -> a) -> a -> Array L sh a -> a
+reduceLTS f z rope = runPar $ RP.reduceLTS f z (toRope rope)

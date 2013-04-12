@@ -142,7 +142,7 @@ module Data.Array.Repa
 
 	-- from Data.Array.Repa.Operators.Mapping -------------------
         -- ** Structure preserving operations
-	, map
+	, map, mapLTS
 	, zipWith
 	, (+^), (-^), (*^), (/^)
         , Structured(..)
@@ -162,7 +162,7 @@ module Data.Array.Repa
 	
 	-- from Data.Array.Repa.Operators.Reduction ------------------
 	-- ** Reduction
-	, foldP,    foldS
+	, foldP,    foldS, reduceLTS
 	, foldAllP, foldAllS
 	, sumP,     sumS
 	, sumAllP,  sumAllS
@@ -170,7 +170,7 @@ module Data.Array.Repa
 	
 	-- from Data.Array.Repa.Operators.Selection ------------------
         -- ** Selection
-	, selectP)
+	, selectP, filterLTS)
 where
 import Data.Array.Repa.Base
 import Data.Array.Repa.Shape
@@ -195,6 +195,6 @@ import Data.Array.Repa.Operators.Reduction
 import Data.Array.Repa.Operators.Selection
 import Data.Array.Repa.Arbitrary                ()
 import Prelude          ()
-
+import Data.Array.Repa.Repr.LazyTreeSplitting
 
 

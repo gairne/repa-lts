@@ -1,15 +1,17 @@
 
 module Data.Array.Repa.Repr.LazyTreeSplitting
         ( L, Array (..)
+        , fromRope, toRope, ropeFromList, ropeToList
         )
 where
-import Data.Array.Repa.Shape            as R
-import Data.Array.Repa.Base             as R
-import Data.Array.Repa.Eval             as R
-import Data.Array.Repa.Repr.Delayed     as R
+import Data.Array.Repa.Shape
+import Data.Array.Repa.Base hiding (toList)
+import Data.Array.Repa.Eval hiding (fromList, toList)
+import Data.Array.Repa.Index
 import Control.Monad
 import qualified Data.Rope as T
-import qualified Data.Rope.Seq TS
+import qualified Data.Rope.Seq as TS
+import Control.DeepSeq
 
 --TODO: FIX
 -- | Unboxed arrays are represented as unboxed vectors.
@@ -22,9 +24,9 @@ import qualified Data.Rope.Seq TS
 --
 data L
 
-linearIndex' :: Int -> Rope a -> a
-linearIndex' n (Leaf x) = TS.index x n
-linearIndex' n (Cat s d l r) =
+linearIndex' :: Int -> T.Rope a -> a
+linearIndex' n (T.Leaf x) = TS.index x n
+linearIndex' n (T.Cat s d l r) =
     if (T.length l) <= n
     then linearIndex' n l
     else linearIndex' (n - (T.length l)) r
@@ -33,14 +35,14 @@ linearIndex' n (Cat s d l r) =
 -- | Read elements from an unboxed vector array.
 instance Source L a where
  data Array L sh a --TODO: Restrict to DIM1? Can we do DIM2+?
-        = ARope !sh !(Rope a)
+        = ARope !sh !(T.Rope a)
 
- linearIndex (ARope sh vec) ix
-        = linearIndex' (size sh) vec ix
+ linearIndex (ARope _ vec) ix
+        = linearIndex' ix vec
  {-# INLINE linearIndex #-}
 
- unsafeLinearIndex (ARope _ vec) ix
-        = linearIndex' (size sh) vec ix
+ unsafeLinearIndex (ARope sh vec) ix
+        = linearIndex' ix vec
  {-# INLINE unsafeLinearIndex #-}
 
  extent (ARope sh _)
@@ -56,5 +58,23 @@ instance Source L a where
 deriving instance (Show sh, Show e)
         => Show (Array L sh e)
 
-deriving instance (Read sh, Read e)
-        => Read (Array L sh e)
+--deriving instance (Read sh, Read e)
+--        => Read (Array L sh e)
+
+-- | O(1)
+fromRope :: Shape sh => sh -> T.Rope a -> Array L sh a
+fromRope sh rp = ARope sh rp
+{-# INLINE fromRope #-}
+
+-- | O(1)
+toRope :: Shape sh => Array L sh a -> T.Rope a
+toRope (ARope sh rp) = rp
+{-# INLINE toRope #-}
+
+ropeFromList :: Shape sh => sh -> [a] -> Array L sh a
+ropeFromList sh xs = ARope sh (let x = T.fromList xs in x `seq` x) --(ix1 (length xs)) (T.fromList xs)
+{-# INLINE ropeFromList #-}
+
+ropeToList :: Shape sh => Array L sh a -> [a]
+ropeToList (ARope _ rp) = let x = T.toList rp in x `seq` x
+{-# INLINE ropeToList #-}

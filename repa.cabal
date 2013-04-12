@@ -50,6 +50,8 @@ Library
         StandaloneDeriving
         ScopedTypeVariables
         PatternGuards
+        CPP
+        GADTs
 
   Exposed-modules:
         Data.Array.Repa.Eval.Gang
@@ -81,6 +83,7 @@ Library
         Data.Array.Repa
         Data.Rope
         Data.Rope.Seq
+        Data.Array.Repa.Repr.LazyTreeSplitting
 
   Other-modules:
         Data.Array.Repa.Eval.Chunked
