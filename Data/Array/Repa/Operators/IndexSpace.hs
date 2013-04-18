@@ -2,7 +2,7 @@
 
 module Data.Array.Repa.Operators.IndexSpace
 	( reshape
-	, append, (++)
+	, append, (++), appendLTS
 	, transpose
         , extract
 	, backpermute,         unsafeBackpermute
@@ -18,6 +18,9 @@ import Data.Array.Repa.Operators.Traversal
 import Data.Array.Repa.Shape		as S
 import Prelude				hiding ((++))
 import qualified Prelude		as P
+
+import Data.Array.Repa.Repr.LazyTreeSplitting
+import qualified Data.Rope as RP
 
 stage	= "Data.Array.Repa.Operators.IndexSpace"
 
@@ -40,6 +43,10 @@ reshape sh2 arr
         $ unsafeIndex arr . fromIndex (extent arr) . toIndex sh2
 {-# INLINE [2] reshape #-}
  
+
+appendLTS :: (Shape DIM1, Source L a) => Array L DIM1 a -> Array L DIM1 a -> Array L DIM1 a
+appendLTS arr1 arr2 = fromRope (ix1 ((size (extent arr1)) + (size (extent arr2)))) (RP.cat (toRope arr1) (toRope arr2))
+{-# INLINE appendLTS #-}
 
 -- | Append two arrays.
 append, (++)

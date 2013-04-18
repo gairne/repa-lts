@@ -2,7 +2,7 @@
 
 module Data.Array.Repa.Operators.Mapping
         ( -- * Generic maps
-          map, mapLTS
+          map, mapLTS, zipWithLTS
         , zipWith
         , (+^), (-^), (*^), (/^)
 
@@ -28,7 +28,10 @@ import qualified Data.Rope as RP
 import Control.Monad.Par
 
 mapLTS :: (Shape sh, Source L a) => (a -> b) -> Array L sh a -> Array L sh b
-mapLTS f rope = fromRope (extent rope) $ runPar $ RP.mapLTS f (toRope rope)
+mapLTS f rope = fromRope (extent rope) (runPar $ RP.mapLTS f (toRope rope))
+
+zipWithLTS :: (Shape sh, Source L a, Source L b) => (a -> b -> c) -> Array L sh a -> Array L sh b -> Array L sh c
+zipWithLTS f rp1 rp2 = fromRope (extent rp1) $ runPar $ RP.zipWithLTS f (toRope rp1) (toRope rp2)
 
 -- | Apply a worker function to each element of an array, 
 --   yielding a new array with the same extent.

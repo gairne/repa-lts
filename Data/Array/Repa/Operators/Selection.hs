@@ -47,6 +47,9 @@ selectP match produce len
 		return	(Z :. V.length result, result)
 {-# INLINE [1] selectP #-}
 
-filterLTS :: (Shape sh, Source L a) => (a -> Bool) -> Array L sh a -> Array L sh a
-filterLTS f rope = fromRope (extent rope) $ runPar $ RP.filterLTS f (toRope rope)
+filterLTS :: (Shape DIM1, Source L a) => (a -> Bool) -> Array L DIM1 a -> Array L DIM1 a
+filterLTS f rope = let rp = runPar $ RP.filterLTS f (toRope rope)
+                       (rp', l', _) = RP.rebuildMD rp
+                       rp'' = RP.balance rp'
+                   in fromRope (ix1 l') rp''
 -- Will extent rope be applicable...? the rope has changed length

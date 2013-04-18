@@ -129,7 +129,7 @@ module Data.Array.Repa
         -- * Operators
 	-- ** Index space transformations
 	, reshape
-	, append, (++)
+	, append, (++), appendLTS
         , extract
 	, transpose
 	, backpermute
@@ -143,7 +143,7 @@ module Data.Array.Repa
 	-- from Data.Array.Repa.Operators.Mapping -------------------
         -- ** Structure preserving operations
 	, map, mapLTS
-	, zipWith
+	, zipWith, zipWithLTS
 	, (+^), (-^), (*^), (/^)
         , Structured(..)
 

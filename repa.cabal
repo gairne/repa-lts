@@ -83,6 +83,10 @@ Library
         Data.Array.Repa
         Data.Rope
         Data.Rope.Seq
+        Data.Rope.Rope
+        Data.Rope.Operators.Mapping
+        Data.Rope.Operators.Zipping
+        Data.Rope.Operators.Reduction
         Data.Array.Repa.Repr.LazyTreeSplitting
 
   Other-modules:
