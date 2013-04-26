@@ -1,7 +1,7 @@
 
 module Data.Array.Repa.Repr.LazyTreeSplitting
         ( L, Array (..)
-        , fromRope, toRope, ropeFromList, ropeToList
+        , fromRope, toRope, ropeFromList, ropeToList, setGlobalLeafSize
         )
 where
 import Data.Array.Repa.Shape
@@ -60,6 +60,9 @@ deriving instance (Show sh, Show e)
 
 --deriving instance (Read sh, Read e)
 --        => Read (Array L sh e)
+
+setGlobalLeafSize :: Int -> IO ()
+setGlobalLeafSize k = T.set_mAX_LEAF_SIZE k
 
 -- | O(1)
 fromRope :: Shape sh => sh -> T.Rope a -> Array L sh a
